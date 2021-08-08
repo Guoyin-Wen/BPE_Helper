@@ -6,14 +6,20 @@
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.intellij.scala</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.dogsunny.bpehelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.dogsunny.bpehelper.services.MyProjectService"/>
+        <!-- 用于解析 invoke 等方法 -->
+        <psi.referenceContributor implementation="com.github.dogsunny.bpehelper.language.reference.FlowReferenceContributor"/>
+        <notificationGroup displayType="BALLOON" id="FlowReference"/>
     </extensions>
 
     <applicationListeners>
         <listener class="com.github.dogsunny.bpehelper.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
+
 </idea-plugin>
