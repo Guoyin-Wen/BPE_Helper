@@ -1,6 +1,6 @@
-package org.jetbrains.plugins.template.services
+package com.github.dogsunny.bpehelper.services
 
-import org.jetbrains.plugins.template.MyBundle
+import com.github.dogsunny.bpehelper.MyBundle
 
 class MyApplicationService {
 
