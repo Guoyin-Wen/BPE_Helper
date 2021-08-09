@@ -1,30 +1,37 @@
 package com.github.dogsunny.bpehelper.language.reference
 
-import com.intellij.openapi.util.TextRange
+import com.intellij.patterns.InitialPatternCondition
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.*
-import com.intellij.psi.search.FilenameIndex
-import com.intellij.psi.search.searches.ReferencesSearch
-import com.intellij.util.FileContentUtil
-import com.intellij.util.FileContentUtilCore
 import com.intellij.util.ProcessingContext
-import org.jetbrains.plugins.scala.conversion.ast.MethodCallExpression
-import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenType
+import org.jetbrains.plugins.scala.injection.ScalaLanguageInjectionSupport
 import org.jetbrains.plugins.scala.lang.psi.api.ScalaPsiElement
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScClass
-import org.jetbrains.plugins.scala.lang.psi.fake.FakePsiTypeElement
-import org.jetbrains.plugins.scala.lang.psi.impl.expr.ScMethodCallImpl
-import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
+import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
+import org.jetbrains.plugins.scala.lang.psi.impl.ScalaFileImpl
+import org.jetbrains.plugins.scala.patterns.ScalaElementPattern
+
 
 // 为一些方法提供引用
 
 class FlowReferenceContributor : PsiReferenceContributor() {
 
+    // 无法为方法提供 淦 PsiLanguageInjectionHost
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
-        registrar.registerReferenceProvider<ScMethodCall> { element, context ->
-            arrayOf(FlowMethodReference(element, TextRange(1, (element as ScalaPsiElement).sameElementInContext.toString().length + 1)))
-        }
+        // ScalaLanguageInjectionSupport
+        val sc = Capture(ScReference::class.java)
+        val psiElement =
+            PlatformPatterns.psiFile(ScalaFileImpl::class.java)
+        registrar.registerReferenceProvider(sc,
+            object : PsiReferenceProvider() {
+                override fun getReferencesByElement(
+                    element: PsiElement,
+                    context: ProcessingContext
+                ): Array<PsiReference> {
+                   /* val literalExpression = element as PsiLiteralExpression
+                    val value = if (literalExpression.value is String) literalExpression.value as String? else null*/
+                    return PsiReference.EMPTY_ARRAY
+                }
+            })
     }
 
     private inline fun <reified T : PsiElement>PsiReferenceRegistrar.registerReferenceProvider(noinline func: (T, ProcessingContext) -> Array<PsiReference>) {
@@ -39,5 +46,10 @@ class FlowReferenceContributor : PsiReferenceContributor() {
                 return func(element, context)
             }
         }
+    }
+
+    class Capture<T : ScalaPsiElement?> : ScalaElementPattern<T, Capture<T>?> {
+        constructor(elementClass: Class<T>?) : super(elementClass) {}
+        constructor(condition: InitialPatternCondition<T>) : super(condition) {}
     }
 }

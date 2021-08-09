@@ -13,7 +13,11 @@
         <applicationService serviceImplementation="com.github.dogsunny.bpehelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.dogsunny.bpehelper.services.MyProjectService"/>
         <!-- 用于解析 invoke 等方法 -->
-        <psi.referenceContributor implementation="com.github.dogsunny.bpehelper.language.reference.FlowReferenceContributor"/>
+        <!--<psi.referenceContributor
+                implementation="com.github.dogsunny.bpehelper.language.reference.FlowReferenceContributor"
+        />-->
+        <codeInsight.lineMarkerProvider language="Scala"
+                                        implementationClass="com.github.dogsunny.bpehelper.language.maker.XmlLineMarkerProvider"/>
         <notificationGroup displayType="BALLOON" id="FlowReference"/>
     </extensions>
 
