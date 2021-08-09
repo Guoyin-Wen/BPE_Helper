@@ -1,14 +1,10 @@
 package com.github.dogsunny.bpehelper.language.maker
 
+import com.github.dogsunny.bpehelper.Const
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiLiteralExpression
-import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
-import javax.swing.Icon
 
 
 class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
@@ -33,9 +29,10 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
 
         }*/
 
-        val builder = NavigationGutterIconBuilder.create(IconLoader.getIcon("/META-INF/pluginIcon.svg"))
-            //.setTargets(properties)
-            .setTooltipText("Navigate to Simple language property")
+        val messages = XmlUtils.findMessage(element.project, service, message)
+        val builder = NavigationGutterIconBuilder.create(Const.FILE_ICON)
+            .setTargets(messages)
+            .setTooltipText("xml文件")
         result.add(builder.createLineMarkerInfo(element))
     }
 
