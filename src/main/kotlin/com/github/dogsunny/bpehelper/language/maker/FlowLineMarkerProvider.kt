@@ -6,11 +6,10 @@ import com.github.dogsunny.bpehelper.language.maker.renderer.ListCellRenderer
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
-import com.intellij.ide.util.PsiElementListCellRenderer
 import com.intellij.psi.PsiElement
 import com.intellij.psi.xml.XmlTag
 class FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
-    val renderer = ListCellRenderer();
+    private val renderer = ListCellRenderer();
     override fun collectNavigationMarkers(
         element: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
@@ -23,7 +22,9 @@ class FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         val serviceIdName = tag2IdName(serviceTag)?:return
         val messageTag = getMessageTag(element)
         val messageIdName = messageTag?.let { tag2IdName(it) }
-        val flows = FlowUtil.findFlowFile(serviceTag.project, serviceIdName, messageIdName).sortedBy { it.name }
+        val flows = FlowUtil.findFlowFile(serviceTag.project, serviceIdName, messageIdName).sortedBy {
+            it.name.split("_")[1].toIntOrNull()
+        }
         val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_ERROR else Const.Icon.File.FLOW
         val text = if (flows.isEmpty()) "点击跳转" else "没有对应的flow文件"
         val builder = NavigationGutterIconBuilder.create(icon)
