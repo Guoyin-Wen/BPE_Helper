@@ -24,13 +24,18 @@ object XmlUtils {
         return xml[0]
     }
 
-    fun findMessage(project: Project, service: String, message: String): List<XmlTag> {
-        val xmlFile = findXml(project, service) ?: return emptyList()
+    fun findMessage(project: Project, service: String, message: String): Pair<List<XmlTag>, String> {
+        val xmlFile = findXml(project, service) ?: return Pair(emptyList(), "")
         val findFile = PsiManager.getInstance(project).findFile(xmlFile) as XmlFile
-        return findFile.document
+        val nodes = (findFile.document
             ?.rootTag
             ?.findSubTags("message")
-            ?.filter { it.getAttributeValue("name") == message}
-            ?: emptyList()
+            ?.filter { it.getAttributeValue("name") == message }
+            ?: emptyList())
+        val serviceId = findFile.document?.rootTag?.getAttributeValue("id")
+        val text = nodes.joinToString(separator = "\n") {
+            "service_id: $serviceId message_id:${it.getAttributeValue("id")}"
+        }
+        return Pair(nodes, text)
     }
 }

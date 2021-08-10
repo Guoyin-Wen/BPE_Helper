@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement
 
 
 class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
+
+    val regx = Regex("//\\$([a-zA-Z_]+?)\\.([a-zA-Z_]+?)(\\.with\\([a-zA-Z]+?\\))?")
+
     override fun collectNavigationMarkers(
         element: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>
@@ -17,27 +20,18 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         if (!element.containingFile.name.endsWith(".flow")) return
         val (service, message) = extractServiceMessage(element.text)
 
-        // $orderservice.QueryAccountTradeOrNot
-        //$orderservice.QueryAccountTradeOrNot
-        // The literal expression must start with the Simple language literal expression
-
-        // Get the Simple language property usage
-/*        val project: Project = element.getProject()
-        val properties: List<SimpleProperty> = SimpleUtil.findProperties(project, possibleProperties)
-        if (properties.size > 0) {
-            // Add the property to a collection of line marker info
-
-        }*/
-
-        val messages = XmlUtils.findMessage(element.project, service, message)
-        val builder = NavigationGutterIconBuilder.create(Const.FILE_ICON)
+        val (messages, text) = XmlUtils.findMessage(element.project, service, message)
+        if (messages.isEmpty()) return
+        val builder = NavigationGutterIconBuilder.create(Const.Icon.File.DESCRIPTION)
             .setTargets(messages)
-            .setTooltipText("xml文件")
+            .setTooltipText(text)
+            .setEmptyPopupText("没有找到对应接口描述文件")
+
         result.add(builder.createLineMarkerInfo(element))
     }
 
     private val prefix = "//$"
-    fun extractServiceMessage(comment: String): Pair<String, String> {
+    private fun extractServiceMessage(comment: String): Pair<String, String> {
         return comment.trim().removePrefix(prefix).split(".").let { Pair(it[0], it[1]) }
     }
 
