@@ -1,21 +1,15 @@
-package com.github.dogsunny.bpehelper.language.maker
+package com.github.dogsunny.bpehelper.language.maker.util
 
-import com.intellij.diff.contents.FileDocumentContentImpl
 import com.intellij.ide.highlighter.XmlFileType
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.*
-import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
-import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.xml.XmlFile
 import com.intellij.psi.xml.XmlTag
-import org.jetbrains.plugins.scala.ScalaFileType
-import org.jetbrains.uast.test.env.findUElementByTextFromPsi
 
-object XmlUtils {
+object XmlElementFinder {
     private fun findXml(project: Project, service: String): VirtualFile? {
         val xml = FileTypeIndex.getFiles(XmlFileType.INSTANCE, GlobalSearchScope.projectScope(project))
             .filter { Regex("${service.lowercase()}_[0-9]+\\.xml").matches(it.name.lowercase()) }

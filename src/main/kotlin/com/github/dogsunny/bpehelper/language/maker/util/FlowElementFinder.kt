@@ -1,53 +1,20 @@
-package com.github.dogsunny.bpehelper.language.maker
+package com.github.dogsunny.bpehelper.language.maker.util
 
 import com.github.dogsunny.bpehelper.language.maker.po.IdName
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiReference
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiUtil
 import org.jetbrains.plugins.scala.ScalaFileType
 import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
-import org.jetbrains.plugins.scala.lang.psi.api.ScalaPsiElement
-import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.lang.psi.impl.base.ScStringLiteralImpl
 import org.jetbrains.plugins.scala.lang.psi.impl.expr.ScArgumentExprListImpl
-import org.jetbrains.plugins.scala.lang.psi.impl.expr.ScReferenceImpl
-import scala.reflect.ClassTag
 
-object FlowUtil {
-
-//59401_1_Login.flow
-/*    fun findFlow(project: Project, serviceInf: IdName, messageInf: IdName? = null): List<PsiComment> {
-    val fileNameRegx = getFileNameRegx(serviceInf, messageInf)
-    val commentRegx = getCommentRegx(serviceInf, messageInf)
-    val psiManager = PsiManager.getInstance(project)
-    return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))
-        .filter {
-            val matches = fileNameRegx.matches(it.name.lowercase())
-            if (!matches) {
-                println("${matches.toString()} - ${it.name.lowercase()}")
-            }
-            matches
-        }
-        .mapNotNull { psiManager.findFile(it) }
-        .filterIsInstance<ScalaFile>()
-        .flatMap { PsiTreeUtil.findChildrenOfType(it, PsiComment::class.java) }
-        .filter {
-            val matches = commentRegx.matches(it.text.trim())
-            if (!matches) {
-                println("${matches.toString()} - ${it.text.trim()}")
-            }
-            matches
-        }
-
-    }*/
+object FlowElementFinder {
 
     fun findFlowFile(project: Project, serviceInf: IdName, messageInf: IdName? = null): List<ScalaFile> {
         val fileNameRegx = getFileNameRegx(serviceInf, messageInf)
@@ -67,6 +34,7 @@ object FlowUtil {
 
     fun findInvoke(project: Project, serviceInf: IdName, messageInf: IdName?): List<PsiElement> {
         val psiManager = PsiManager.getInstance(project)
+
         return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))
             .filter { it.name.endsWith(".flow") }
             .mapNotNull { psiManager.findFile(it) }
@@ -77,7 +45,6 @@ object FlowUtil {
             .mapNotNull {
                 val arg = PsiTreeUtil.getChildOfType(it, ScArgumentExprListImpl::class.java)
                 if (arg == null) null else Pair(it, arg)
-
             }
             .mapNotNull {
                 val literal = PsiTreeUtil.getChildOfType(it.second, ScStringLiteralImpl::class.java)

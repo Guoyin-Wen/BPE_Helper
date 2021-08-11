@@ -19,7 +19,7 @@ class FlowFileIconProvider : FileIconProvider {
         psiFile?:return null
         return when (psiFile.language) {
             XMLLanguage.INSTANCE -> xml(psiFile)
-            ScalaLanguage.INSTANCE -> flow(psiFile)
+            //ScalaLanguage.INSTANCE -> flow(psiFile)
             else -> null
         }
     }

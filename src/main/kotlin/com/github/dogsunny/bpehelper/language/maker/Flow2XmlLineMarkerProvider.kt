@@ -1,19 +1,19 @@
 package com.github.dogsunny.bpehelper.language.maker
 
 import com.github.dogsunny.bpehelper.Const
+import com.github.dogsunny.bpehelper.language.maker.util.XmlElementFinder
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.plugins.scala.lang.parser.ScalaElementType
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.lang.psi.impl.base.ScStringLiteralImpl
 import org.jetbrains.plugins.scala.lang.psi.impl.expr.ScArgumentExprListImpl
 
 
-class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
+class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
 
     private val commentRegx = Regex("//\\$([a-zA-Z_]+?)\\.([a-zA-Z_]+?)(\\.with\\([a-zA-Z]+?\\))?")
 
@@ -41,7 +41,7 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         if (!text.contains('.')) return
         val prueText = text.substring(1..text.length - 2)
         val (serviceName, messageName) = prueText.split(".")
-        val (messages, tip) = XmlUtils.findMessage(element.project, serviceName, messageName)
+        val (messages, tip) = XmlElementFinder.findMessage(element.project, serviceName, messageName)
         if (messages.isEmpty()) return
 
         val external = messages.all { it.containingFile.virtualFile.path.contains(Const.Magic.Filename.EXTERNAL) }
@@ -74,7 +74,7 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         val service = values[1]
         val message = values[2]
 
-        val (messages, text) = XmlUtils.findMessage(element.project, service, message)
+        val (messages, text) = XmlElementFinder.findMessage(element.project, service, message)
         if (messages.isEmpty()) return
         val builder = NavigationGutterIconBuilder.create(Const.Icon.File.DESCRIPTION)
             .setTargets(messages)

@@ -4,12 +4,17 @@ import com.github.dogsunny.bpehelper.Const
 import com.github.dogsunny.bpehelper.language.maker.po.IdName
 import com.github.dogsunny.bpehelper.language.maker.renderer.ListCellRenderer
 import com.github.dogsunny.bpehelper.language.maker.renderer.XmlLinkedServiceCellRenderer
+import com.github.dogsunny.bpehelper.language.maker.util.FlowElementFinder
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.xml.XmlTag
-class FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
+
+/**
+ * 从Xml跳转的Flow
+ */
+class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
     private val renderer = ListCellRenderer();
     private val xmlLinkedServiceCellRenderer = XmlLinkedServiceCellRenderer();
     override fun collectNavigationMarkers(
@@ -35,7 +40,7 @@ class FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>,
         element: XmlTag
     ) {
-        val flows = FlowUtil.findInvoke(serviceTag.project, serviceIdName, messageIdName)
+        val flows = FlowElementFinder.findInvoke(serviceTag.project, serviceIdName, messageIdName)
         val icon = if (flows.isEmpty()) Const.Icon.Flag.Flow.REFERENCE_NONE else Const.Icon.Flag.Flow.REFERENCE
         val text = if (flows.isNotEmpty()) "用到此消息的地方" else "没有对应的flow文件"
         val builder = NavigationGutterIconBuilder.create(icon)
@@ -53,7 +58,7 @@ class FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>,
         element: XmlTag
     ) {
-        val flows = FlowUtil.findFlowFile(serviceTag.project, serviceIdName, messageIdName).sortedBy {
+        val flows = FlowElementFinder.findFlowFile(serviceTag.project, serviceIdName, messageIdName).sortedBy {
             it.name.split("_")[1].toIntOrNull()
         }
         val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_ERROR else Const.Icon.File.FLOW
