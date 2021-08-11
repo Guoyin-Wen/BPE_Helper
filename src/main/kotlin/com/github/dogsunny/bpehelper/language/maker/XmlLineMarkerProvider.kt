@@ -18,7 +18,12 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         // This must be an element with a literal expression as a parent
         if (element !is com.intellij.psi.impl.source.tree.PsiCommentImpl) return
         if (!element.containingFile.name.endsWith(".flow")) return
-        val (service, message) = extractServiceMessage(element.text)
+        if (!regx.matches(element.text)) return
+        val groups = regx.matchEntire(element.text)?:return
+        val values = groups.groupValues
+        val service = values[1]
+        val message = values[2]
+        //val (service, message) = extractServiceMessage(element.text)
 
         val (messages, text) = XmlUtils.findMessage(element.project, service, message)
         if (messages.isEmpty()) return
@@ -33,15 +38,6 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
     private val prefix = "//$"
     private fun extractServiceMessage(comment: String): Pair<String, String> {
         return comment.trim().removePrefix(prefix).split(".").let { Pair(it[0], it[1]) }
-    }
-
-    fun valid(comment: String): Boolean {
-        val trim = comment.trim()
-        if (!trim.startsWith(prefix)) return false;
-        val removePrefix = trim.removePrefix(prefix)
-        val array = removePrefix.split(".")
-        if (array.size != 2) return false;
-        return array[0].isNotBlank() && array[1].isNotBlank();
     }
 
     private class ServiceMessage() {

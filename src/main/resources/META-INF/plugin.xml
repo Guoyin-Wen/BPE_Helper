@@ -20,6 +20,7 @@
                                         implementationClass="com.github.dogsunny.bpehelper.language.maker.XmlLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="XML"
                                         implementationClass="com.github.dogsunny.bpehelper.language.maker.FlowLineMarkerProvider"/>
+        <fileIconProvider implementation="com.github.dogsunny.bpehelper.language.icon.FlowFileIconProvider"/>
         <notificationGroup displayType="BALLOON" id="FlowReference"/>
     </extensions>
 
