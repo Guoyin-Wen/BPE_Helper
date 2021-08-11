@@ -16,9 +16,9 @@ import org.jetbrains.plugins.scala.ScalaFileType
 import org.jetbrains.uast.test.env.findUElementByTextFromPsi
 
 object XmlUtils {
-    fun findXml(project: Project, service: String): VirtualFile? {
+    private fun findXml(project: Project, service: String): VirtualFile? {
         val xml = FileTypeIndex.getFiles(XmlFileType.INSTANCE, GlobalSearchScope.projectScope(project))
-            .filter { Regex("${service}_[0-9]+\\.xml").matches(it.name) }
+            .filter { Regex("${service.lowercase()}_[0-9]+\\.xml").matches(it.name.lowercase()) }
             .filter { it.parent.path.contains("avenue_conf") }
         if (xml.isEmpty()) return null
         return xml[0]
@@ -30,7 +30,7 @@ object XmlUtils {
         val nodes = (findFile.document
             ?.rootTag
             ?.findSubTags("message")
-            ?.filter { it.getAttributeValue("name") == message }
+            ?.filter { it.getAttributeValue("name")?.lowercase() == message.lowercase() }
             ?: emptyList())
         val serviceId = findFile.document?.rootTag?.getAttributeValue("id")
         val text = nodes.joinToString(separator = "\n") {

@@ -54,12 +54,13 @@ object FlowUtil {
         val commentRegx = getCommentRegx(serviceInf, messageInf)
         val psiManager = PsiManager.getInstance(project)
         return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))
-            .filter { fileNameRegx.matches(it.name.lowercase()) }
+            //.filter { fileNameRegx.matches(it.name.lowercase()) }
+            .filter { it.name.endsWith(".flow") }
             .mapNotNull { psiManager.findFile(it) }
             .filterIsInstance<ScalaFile>()
             .filter {
                 PsiTreeUtil.findChildrenOfType(it, PsiComment::class.java)
-                .any { comment -> commentRegx.matches(comment.text.trim()) }
+                .any { comment -> commentRegx.matches(comment.text.trim().lowercase()) }
             }
 
     }
@@ -102,9 +103,9 @@ object FlowUtil {
     }
 
     private fun getCommentRegx(serviceInf: IdName, messageInf: IdName?): Regex {
-        val serviceName = serviceInf.name
+        val serviceName = serviceInf.name.lowercase()
         val messageId = messageInf?.id ?: "[0-9]+?"
-        val messageName = messageInf?.name?:"[a-zA-Z]+?"
+        val messageName = messageInf?.name?.lowercase()?:"[a-zA-Z]+?"
         val pattern = "//\\$${serviceName}\\.${messageName}(\\.with\\([a-zA-Z]+?\\))?"
         return Regex(pattern)
     }
