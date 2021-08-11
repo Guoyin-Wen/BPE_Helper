@@ -11,10 +11,15 @@ object Const {
         }
         object Flag {
             object Service {
-                val EXTERNAL = IconLoader.getIcon("/icon/flag/external_service.svg", this.javaClass)
-                val INTERNAL = IconLoader.getIcon("/icon/flag/internal_service.svg", this.javaClass)
-                val PUBLIC = IconLoader.getIcon("/icon/flag/public_service.svg", this.javaClass)
-                val UNCERTAIN = IconLoader.getIcon("/icon/flag/uncertain_service.svg", this.javaClass)
+                val EXTERNAL = IconLoader.getIcon("/icon/flag/service/external.svg", this.javaClass)
+                val INTERNAL = IconLoader.getIcon("/icon/flag/service/internal.svg", this.javaClass)
+                val PUBLIC = IconLoader.getIcon("/icon/flag/service/public.svg", this.javaClass)
+                val UNCERTAIN = IconLoader.getIcon("/icon/flag/service/uncertain.svg", this.javaClass)
+
+            }
+            object Flow {
+                val REFERENCE = IconLoader.getIcon("/icon/flag/flow/reference.svg", this.javaClass)
+                val REFERENCE_NONE = IconLoader.getIcon("/icon/flag/flow/reference_none.svg", this.javaClass)
             }
         }
     }

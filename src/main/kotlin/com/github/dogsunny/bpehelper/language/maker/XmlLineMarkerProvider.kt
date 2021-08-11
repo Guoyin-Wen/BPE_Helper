@@ -32,7 +32,7 @@ class XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>
     ) {
         if (element !is ScReferenceExpression) return
-        if (element.text != "invoke") return
+        if (!element.text.startsWith("invoke")) return
         val argumentExpr = PsiTreeUtil.getNextSiblingOfType(element, ScArgumentExprListImpl::class.java)?:return
         val literal = PsiTreeUtil.getChildOfType(argumentExpr, ScStringLiteralImpl::class.java)?:return
         val leaf = PsiTreeUtil.getChildOfType(literal, PsiElement::class.java)?:return
