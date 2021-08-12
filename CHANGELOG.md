@@ -3,5 +3,10 @@
 # BPE_Helper Changelog
 
 ## [Unreleased]
+
+## [1.0.0] - 2021-8-12
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- xml file icon
+- xml -> flow
+- flow -> xml
+- flow -> flow
