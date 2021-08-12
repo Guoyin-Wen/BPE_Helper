@@ -10,6 +10,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.plugins.scala.ScalaFileType
 import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
+import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScArgumentExprList
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScMethodCall
 import org.jetbrains.plugins.scala.lang.psi.impl.base.ScStringLiteralImpl
 import org.jetbrains.plugins.scala.lang.psi.impl.expr.ScArgumentExprListImpl
@@ -17,7 +19,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.expr.ScArgumentExprListImpl
 object FlowElementFinder {
 
     fun findFlowFile(project: Project, serviceInf: IdName, messageInf: IdName? = null): List<ScalaFile> {
-        val fileNameRegx = getFileNameRegx(serviceInf, messageInf)
+        //val fileNameRegx = getFileNameRegx(serviceInf, messageInf)
         val commentRegx = getCommentRegx(serviceInf, messageInf)
         val psiManager = PsiManager.getInstance(project)
         return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))
@@ -25,39 +27,30 @@ object FlowElementFinder {
             .filter { it.name.endsWith(".flow") }
             .mapNotNull { psiManager.findFile(it) }
             .filterIsInstance<ScalaFile>()
-            .filter {
-                PsiTreeUtil.findChildrenOfType(it, PsiComment::class.java)
-                .any { comment -> commentRegx.matches(comment.text.trim().lowercase()) }
+            .filter { scalaFile ->
+                scalaFile.getChildrenOfType<PsiComment>()
+                    ?.map { it.text.trim().lowercase() }
+                    ?.any { commentRegx.matches(it) }?: false
+/*                PsiTreeUtil.findChildrenOfType(it, PsiComment::class.java)
+                .any { comment -> commentRegx.matches(comment.text.trim().lowercase()) }*/
             }
 
     }
 
-    fun findInvoke(project: Project, serviceInf: IdName, messageInf: IdName?): List<ScMethodCall> {
+    fun findInvoke(project: Project, serviceInf: IdName, messageInf: IdName?): List<ScStringLiteral> {
         val psiManager = PsiManager.getInstance(project)
 
         return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))
             .filter { it.name.endsWith(".flow") }
             .mapNotNull { psiManager.findFile(it) }
             .filterIsInstance<ScalaFile>()
-            .flatMap { PsiTreeUtil.getChildrenOfTypeAsList(it, ScMethodCall::class.java) }
+            .flatMap { it.getChildrenOfTypeAsList<ScMethodCall>() }
             .asSequence()
             .filter { it.text.startsWith("invoke") }
-            .mapNotNull {
-                val arg = PsiTreeUtil.getChildOfType(it, ScArgumentExprListImpl::class.java)
-                if (arg == null) null else Pair(it, arg)
-            }
-            .mapNotNull {
-                val literal = PsiTreeUtil.getChildOfType(it.second, ScStringLiteralImpl::class.java)
-                if (literal == null) null else Pair(it.first, literal)
-            }
-            .filter { it.second.text.contains('.') }
-            .filter { it.second.text.length >= 3 }
-            .filter { it.second.text.startsWith("\""+serviceInf.name) }
-            .filter {
-                if (messageInf == null) true
-                else it.second.text.endsWith(messageInf.name + "\"")
-            }
-            .map { it.first }
+            .mapNotNull { it.getChildOfType<ScArgumentExprList>() }
+            .mapNotNull { it.getChildOfType<ScStringLiteral>() }
+            .filter { it.text.startsWith("\"${serviceInf.name}.") }
+            .filter { messageInf == null || it.text.endsWith(".${messageInf.name}\"") }
             .toList()
     }
 
