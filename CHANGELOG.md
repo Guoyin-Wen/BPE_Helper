@@ -15,3 +15,7 @@
 ## [1.0.1] - 2021-8-12
 ### Fixed
 - 修复兼容性问题，删除没使用的通知组件
+
+## [1.0.2] - 2021-8-12
+### Fixed
+- fix description not in English
