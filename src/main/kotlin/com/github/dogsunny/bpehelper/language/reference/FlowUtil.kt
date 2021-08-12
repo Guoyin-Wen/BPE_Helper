@@ -1,21 +1,16 @@
 package com.github.dogsunny.bpehelper.language.reference
 
-import com.github.dogsunny.bpehelper.Log
 import com.intellij.notification.*
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
-import okhttp3.internal.notify
 import org.jetbrains.plugins.scala.ScalaFileType
 import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDeclaration
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScClass
-import kotlin.math.log
 
 object FlowUtil {
 
