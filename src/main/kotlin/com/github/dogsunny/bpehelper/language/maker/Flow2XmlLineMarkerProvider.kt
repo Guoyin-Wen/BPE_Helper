@@ -12,6 +12,7 @@ import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScArgumentExprList
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
+import java.util.*
 import com.github.dogsunny.bpehelper.Const.Icon.File.DESCRIPTION as DESCRIPTION_ICON
 import com.github.dogsunny.bpehelper.Const.Icon.File.DESCRIPTION_NONE as DESCRIPTION_NONE_ICON
 import com.github.dogsunny.bpehelper.Const.Icon.Flag.Service.EXTERNAL as EXTERNAL_SERVICE_ICON
@@ -50,12 +51,14 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
             ?.getChildOfType<PsiElement>()
             ?:return
 
-        val serviceMessageText = leaf.text
-            ?: return
-        if (serviceMessageText.length < 5) return
-        if (!serviceMessageText.contains('.')) return
-        val prueServiceMessageText = serviceMessageText.substring(1..serviceMessageText.length - 2).lowercase()
-        val (serviceName, messageName) = prueServiceMessageText.split(".")
+        val (serviceName, messageName) = Optional.ofNullable(leaf.text)
+            .filter { it.length >= 5 }
+            .filter { it.contains(".") }
+            .map { it.substring(1 until it.lastIndex).lowercase() }
+            .map { it.split(".") }
+            .orElse(null)
+            ?:return
+
         val messageTags = XmlElementFinder.findMessageTags(scalaElement.module()!!, serviceName, messageName)
 
         val isTagsNone = messageTags.isEmpty()
