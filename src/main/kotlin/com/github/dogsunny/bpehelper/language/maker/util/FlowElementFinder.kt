@@ -32,7 +32,7 @@ object FlowElementFinder {
 
     }
 
-    fun findInvoke(project: Project, serviceInf: IdName, messageInf: IdName?): List<PsiElement> {
+    fun findInvoke(project: Project, serviceInf: IdName, messageInf: IdName?): List<ScMethodCall> {
         val psiManager = PsiManager.getInstance(project)
 
         return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))

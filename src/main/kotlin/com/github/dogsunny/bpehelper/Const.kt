@@ -14,7 +14,7 @@ object Const {
                 val EXTERNAL = IconLoader.getIcon("/icon/flag/service/external.svg", this.javaClass)
                 val INTERNAL = IconLoader.getIcon("/icon/flag/service/internal.svg", this.javaClass)
                 val PUBLIC = IconLoader.getIcon("/icon/flag/service/public.svg", this.javaClass)
-                val UNCERTAIN = IconLoader.getIcon("/icon/flag/service/uncertain.svg", this.javaClass)
+                val UNKNOWN = IconLoader.getIcon("/icon/flag/service/uncertain.svg", this.javaClass)
 
             }
             object Flow {

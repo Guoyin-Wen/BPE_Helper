@@ -18,7 +18,7 @@ object XmlElementFinder {
         return xml[0]
     }
 
-    fun findMessage(project: Project, service: String, message: String): Pair<List<XmlTag>, String> {
+    fun findMessageTags(project: Project, service: String, message: String): Pair<List<XmlTag>, String> {
         val xmlFile = findXml(project, service) ?: return Pair(emptyList(), "")
         val findFile = PsiManager.getInstance(project).findFile(xmlFile) as XmlFile
         val nodes = (findFile.document

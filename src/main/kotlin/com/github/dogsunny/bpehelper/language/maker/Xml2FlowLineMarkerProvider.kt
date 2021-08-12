@@ -1,6 +1,8 @@
 package com.github.dogsunny.bpehelper.language.maker
 
 import com.github.dogsunny.bpehelper.Const
+import com.github.dogsunny.bpehelper.Const.Icon.Flag.Flow.REFERENCE
+import com.github.dogsunny.bpehelper.Const.Icon.Flag.Flow.REFERENCE_NONE
 import com.github.dogsunny.bpehelper.language.maker.po.IdName
 import com.github.dogsunny.bpehelper.language.maker.renderer.ListCellRenderer
 import com.github.dogsunny.bpehelper.language.maker.renderer.XmlLinkedServiceCellRenderer
@@ -15,79 +17,73 @@ import com.intellij.psi.xml.XmlTag
  * 从Xml跳转的Flow
  */
 class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
-    private val renderer = ListCellRenderer();
-    private val xmlLinkedServiceCellRenderer = XmlLinkedServiceCellRenderer();
+    companion object {
+        private val definitionRenderer = ListCellRenderer()
+        private val referenceRenderer = XmlLinkedServiceCellRenderer()
+    }
+
+
     override fun collectNavigationMarkers(
-        element: PsiElement,
+        targetXmlTag: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
     ) {
-        val containingFile = element.containingFile
-        if (!containingFile.virtualFile.path.contains(Const.Magic.Filename.AVENUE_CONF)) return
-        if (element !is XmlTag) return
+        val xmlFilePath = targetXmlTag.containingFile.virtualFile.path
+        if (!xmlFilePath.contains(Const.Magic.Filename.AVENUE_CONF)) return
+        if (targetXmlTag !is XmlTag) return
 
-        val serviceTag = getServiceTag(element)?:return
-        val serviceIdName = tag2IdName(serviceTag)?:return
-        val messageTag = getMessageTag(element)
-        val messageIdName = messageTag?.let { tag2IdName(it) }
-        flowDefinition(serviceTag, serviceIdName, messageIdName, result, element)
-        reference(serviceTag, serviceIdName, messageIdName, result, element)
+        val serviceIdName = targetXmlTag.getServiceTag()?.tag2IdName()?:return
+        val messageIdName = targetXmlTag.getMessageTag()?.run { tag2IdName() }
+
+        val markTarget = targetXmlTag.firstChild
+        // 这里两个如果再增加用类重构
+        val definitionMarkerBuilder = definitionMarkerBuilder(serviceIdName, messageIdName, targetXmlTag)
+        result.add(definitionMarkerBuilder.createLineMarkerInfo(markTarget))
+
+        val referenceMakerBuilder = referenceMarkerBuilder(serviceIdName, messageIdName, targetXmlTag)
+        result.add(referenceMakerBuilder.createLineMarkerInfo(markTarget))
     }
 
-    private fun reference(
-        serviceTag: XmlTag,
-        serviceIdName: IdName,
-        messageIdName: IdName?,
-        result: MutableCollection<in RelatedItemLineMarkerInfo<*>>,
-        element: XmlTag
-    ) {
-        val flows = FlowElementFinder.findInvoke(serviceTag.project, serviceIdName, messageIdName)
-        val icon = if (flows.isEmpty()) Const.Icon.Flag.Flow.REFERENCE_NONE else Const.Icon.Flag.Flow.REFERENCE
-        val text = if (flows.isNotEmpty()) "用到此消息的地方" else "没有对应的flow文件"
-        val builder = NavigationGutterIconBuilder.create(icon)
-            .setTargets(flows)
+    private fun referenceMarkerBuilder(
+        serviceInf: IdName,
+        messageInf: IdName?,
+        xmlTag: XmlTag
+    ): NavigationGutterIconBuilder<PsiElement> {
+        val methodCallList = FlowElementFinder.findInvoke(xmlTag.project, serviceInf, messageInf)
+        val icon = if (methodCallList.isEmpty()) REFERENCE_NONE else REFERENCE
+        val text = if (methodCallList.isNotEmpty()) "用到此消息的地方" else "没有对应的flow文件"
+        return NavigationGutterIconBuilder.create(icon)
+            .setTargets(methodCallList)
             .setTooltipText(text)
-            .setCellRenderer(xmlLinkedServiceCellRenderer)
-
-        result.add(builder.createLineMarkerInfo(element.firstChild))
+            .setCellRenderer(referenceRenderer)
     }
 
-    private fun flowDefinition(
-        serviceTag: XmlTag,
+    private fun definitionMarkerBuilder(
         serviceIdName: IdName,
         messageIdName: IdName?,
-        result: MutableCollection<in RelatedItemLineMarkerInfo<*>>,
         element: XmlTag
-    ) {
-        val flows = FlowElementFinder.findFlowFile(serviceTag.project, serviceIdName, messageIdName).sortedBy {
+    ): NavigationGutterIconBuilder<PsiElement> {
+        val flows = FlowElementFinder.findFlowFile(element.project, serviceIdName, messageIdName).sortedBy {
             it.name.split("_")[1].toIntOrNull()
         }
         val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_ERROR else Const.Icon.File.FLOW
         val text = if (flows.isNotEmpty()) "点击跳转" else "没有对应的flow文件"
-        val builder = NavigationGutterIconBuilder.create(icon)
+        return NavigationGutterIconBuilder.create(icon)
             .setTargets(flows)
             .setTooltipText(text)
-            .setCellRenderer(renderer)
-
-        result.add(builder.createLineMarkerInfo(element.firstChild))
+            .setCellRenderer(definitionRenderer)
     }
 
-    private fun getMessageTag(element: XmlTag): XmlTag? {
-        if (element.name == "message") return element
-        return null;
+    private fun XmlTag.getMessageTag(): XmlTag?  = if (name == "message") this else null
+
+    private fun XmlTag.getServiceTag(): XmlTag? {
+        if (name == "service") return this
+        if (name != "message" && parentTag?.name == "service") return parentTag
+        return null
     }
 
-    private fun getServiceTag(element: XmlTag): XmlTag? {
-        if (element.name == "service") return element;
-        if (element.name == "message") {
-            val parent = element.parent
-            if (parent is XmlTag && parent.name == "service") return parent
-        }
-        return null;
-    }
-
-    private fun tag2IdName(xmlTag: XmlTag): IdName? {
-        val id = xmlTag.getAttributeValue("id")?:return null
-        val name = xmlTag.getAttributeValue("name")?:return null
+    private fun XmlTag.tag2IdName(): IdName? {
+        val id = getAttributeValue("id")?:return null
+        val name = getAttributeValue("name")?:return null
         return IdName(id, name)
     }
 
