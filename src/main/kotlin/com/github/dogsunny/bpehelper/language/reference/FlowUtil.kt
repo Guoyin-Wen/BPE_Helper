@@ -20,11 +20,9 @@ object FlowUtil {
         val funcArray = PsiTreeUtil.getChildrenOfType(flowClass, ScFunctionDeclaration::class.java)
         val filteredFuncArray = funcArray.filter { (it as ScNamedElement).name() == key }
         if (filteredFuncArray.isEmpty()) {
-            Log.error("没有找到 $key 方法")
             return null
         }
         if (filteredFuncArray.size > 1) {
-            Log.warn("多个 $key 方法")
         }
         return filteredFuncArray[0]
     }
@@ -36,7 +34,6 @@ object FlowUtil {
         flowClassFile?:return null
         val classes :Array<ScClass> = PsiTreeUtil.getChildrenOfType(flowClassFile, ScClass::class.java)
         if (classes.isEmpty()) {
-            Log.error("没有找到Flow class")
         }
         return classes[0]
     }
@@ -47,11 +44,9 @@ object FlowUtil {
             GlobalSearchScope.projectScope(project))
         val flowFile = files.filter { it.name == "Flow.scala" }
         if (flowFile.isEmpty()) {
-            Log.error("没有找到Flow scala文件")
             return null
         }
         if (flowFile.size > 1) {
-            Log.warn("多个Flow scala文件")
         }
         return PsiManager.getInstance(project).findFile(flowFile[0]) as ScalaFile
     }

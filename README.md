@@ -14,7 +14,8 @@
 - [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
 
 <!-- Plugin description -->
-支持bpe流程文件的跳转
+此项目用于支持bep框架中的文件跳转，支持flow到xml以及xml到flow的跳转以及引用调用 ，
+已测试通过，放心使用
 <!-- Plugin description end -->
 
 ## Installation
