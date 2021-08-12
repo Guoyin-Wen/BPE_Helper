@@ -1,6 +1,7 @@
 package com.github.dogsunny.bpehelper.language.maker
 
 import com.github.dogsunny.bpehelper.Const
+import com.github.dogsunny.bpehelper.language.maker.po.IdName
 import com.github.dogsunny.bpehelper.Const.Magic.Filename.INTERNAL as DIR_INTERNAL
 import com.github.dogsunny.bpehelper.Const.Magic.Filename.EXTERNAL as DIR_EXTERNAL
 import com.github.dogsunny.bpehelper.language.maker.util.*
@@ -9,6 +10,7 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
+import com.intellij.psi.xml.XmlTag
 import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScArgumentExprList
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
@@ -60,7 +62,35 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
             ?:return
 
         val messageTags = XmlElementFinder.findMessageTags(scalaElement.module()!!, serviceName, messageName)
+        invokeToXml( messageTags, result, leaf)
 
+        // 因为名称和name相同，所以直接用
+        val messageId = messageTags[0].attrValue(Const.Magic.XmlAttr.ID)
+        val serviceId = messageTags[0].parentTag?.attrValue(Const.Magic.XmlAttr.ID)
+        if (messageId != null && serviceId != null) {
+            val flows = FlowElementFinder.findFlowFile(
+                scalaElement.project,
+                IdName(serviceId, serviceName),
+                IdName(messageId, messageName)
+            ).sortedBy {
+                it.name.split("_")[1].toIntOrNull()
+            }
+            val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_NONE else Const.Icon.File.FLOW
+            val text = if (flows.isNotEmpty()) "点击跳转" else "没有对应的flow文件"
+            NavigationGutterIconBuilder.create(icon)
+                .setTargets(flows)
+                .setTooltipText(text)
+                .setCellRenderer(Xml2FlowLineMarkerProvider.DEFINITION_RENDERER)
+                .createLineMarkerInfo(leaf)
+                .let { result.add(it) }
+        }
+    }
+
+    private fun invokeToXml(
+        messageTags: List<XmlTag>,
+        result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>,
+        leaf: PsiElement
+    ) {
         val isTagsNone = messageTags.isEmpty()
         val isInternal = messageTags.all { it.filePath.contains(DIR_INTERNAL) }
         val isExternal = !isInternal && messageTags.all { it.filePath.contains(DIR_EXTERNAL) }
@@ -72,13 +102,14 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
             isPublic -> PUBLIC_SERVICE_ICON
             else -> UNKNOWN_SERVICE_ICON
         }
-
+        val show = Const.Icon.Flag.Service.NAME_MAP[icon] ?: "..."
         val builder = NavigationGutterIconBuilder.create(icon)
             .setTargets(messageTags)
-            .setTooltipText("Navigate to xml")
+            .setTooltipText(show)
 
         result.add(builder.createLineMarkerInfo(leaf))
     }
+
 
     private fun markComment(
         scalaElement: PsiElement,

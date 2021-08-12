@@ -18,6 +18,8 @@
         />-->
         <codeInsight.lineMarkerProvider language="Scala"
                                         implementationClass="com.github.dogsunny.bpehelper.language.maker.Flow2XmlLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="Scala"
+                                        implementationClass="com.github.dogsunny.bpehelper.language.maker.Flow2FlowLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="XML"
                                         implementationClass="com.github.dogsunny.bpehelper.language.maker.Xml2FlowLineMarkerProvider"/>
         <fileIconProvider implementation="com.github.dogsunny.bpehelper.language.icon.FlowFileIconProvider"/>

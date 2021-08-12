@@ -20,7 +20,7 @@ import com.github.dogsunny.bpehelper.Const.Icon.File.FLOW_NONE as FLOW_NONE_ICON
  */
 class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
     companion object {
-        private val DEFINITION_RENDERER = ListCellRenderer()
+        val DEFINITION_RENDERER = ListCellRenderer()
         private val REFERENCE_RENDERER = XmlLinkedServiceCellRenderer()
     }
 

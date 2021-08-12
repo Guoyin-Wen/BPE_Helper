@@ -18,6 +18,13 @@ object Const {
                 val UNKNOWN = IconLoader.getIcon("/icon/flag/service/unknown.svg", this.javaClass)
                 val NONE = IconLoader.getIcon("/icon/flag/service/none.svg", this.javaClass)
 
+                val NAME_MAP = mapOf(
+                    EXTERNAL to "依赖服务",
+                    INTERNAL to "内部服务",
+                    PUBLIC to "开放服务",
+                    UNKNOWN to "未知服务",
+                    NONE to  "没有找到"
+                )
             }
             object Flow {
                 val REFERENCE = IconLoader.getIcon("/icon/flag/flow/reference.svg", this.javaClass)
