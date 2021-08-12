@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>com.github.dogsunny.bpehelper</id>
-    <name>BPE_Helper</name>
+    <name>BPE Helper</name>
     <vendor>dogsunny</vendor>
 
     <!-- Product and plugin compatibility requirements -->
@@ -18,12 +18,12 @@
         />-->
         <codeInsight.lineMarkerProvider language="Scala"
                                         implementationClass="com.github.dogsunny.bpehelper.language.maker.Flow2XmlLineMarkerProvider"/>
-        <codeInsight.lineMarkerProvider language="Scala"
-                                        implementationClass="com.github.dogsunny.bpehelper.language.maker.Flow2FlowLineMarkerProvider"/>
+        <!--<codeInsight.lineMarkerProvider language="Scala"
+                                        implementationClass="com.github.dogsunny.bpehelper.language.maker.Flow2FlowLineMarkerProvider"/>-->
         <codeInsight.lineMarkerProvider language="XML"
                                         implementationClass="com.github.dogsunny.bpehelper.language.maker.Xml2FlowLineMarkerProvider"/>
         <fileIconProvider implementation="com.github.dogsunny.bpehelper.language.icon.FlowFileIconProvider"/>
-        <notificationGroup displayType="BALLOON" id="FlowReference"/>
+        <!--<notificationGroup displayType="BALLOON" id="FlowReference"/>-->
     </extensions>
 
     <applicationListeners>
