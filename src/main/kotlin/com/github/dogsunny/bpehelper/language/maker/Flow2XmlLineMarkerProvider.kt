@@ -12,8 +12,11 @@ import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScArgumentExprList
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
+import com.github.dogsunny.bpehelper.Const.Icon.File.DESCRIPTION as DESCRIPTION_ICON
+import com.github.dogsunny.bpehelper.Const.Icon.File.DESCRIPTION_NONE as DESCRIPTION_NONE_ICON
 import com.github.dogsunny.bpehelper.Const.Icon.Flag.Service.EXTERNAL as EXTERNAL_SERVICE_ICON
 import com.github.dogsunny.bpehelper.Const.Icon.Flag.Service.INTERNAL as INTERNAL_SERVICE_ICON
+import com.github.dogsunny.bpehelper.Const.Icon.Flag.Service.NONE as NONE_ICON
 import com.github.dogsunny.bpehelper.Const.Icon.Flag.Service.PUBLIC as PUBLIC_SERVICE_ICON
 import com.github.dogsunny.bpehelper.Const.Icon.Flag.Service.UNKNOWN as UNKNOWN_SERVICE_ICON
 import com.github.dogsunny.bpehelper.Const.Magic.Filename.AVENUE_CONF as DIR_AVENUE_CONF
@@ -51,15 +54,16 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
             ?: return
         if (serviceMessageText.length < 5) return
         if (!serviceMessageText.contains('.')) return
-        val prueServiceMessageText = serviceMessageText.substring(1..serviceMessageText.length - 2)
+        val prueServiceMessageText = serviceMessageText.substring(1..serviceMessageText.length - 2).lowercase()
         val (serviceName, messageName) = prueServiceMessageText.split(".")
-        val (messages, tip) = XmlElementFinder.findMessageTags(scalaElement.project, serviceName, messageName)
-        if (messages.isEmpty()) return
+        val messageTags = XmlElementFinder.findMessageTags(scalaElement.module()!!, serviceName, messageName)
 
-        val isInternal = messages.all { it.filePath.contains(DIR_INTERNAL) }
-        val isExternal = !isInternal && messages.all { it.filePath.contains(DIR_EXTERNAL) }
-        val isPublic = messages.all { it.virtualFile.parent.name == DIR_AVENUE_CONF }
+        val isTagsNone = messageTags.isEmpty()
+        val isInternal = messageTags.all { it.filePath.contains(DIR_INTERNAL) }
+        val isExternal = !isInternal && messageTags.all { it.filePath.contains(DIR_EXTERNAL) }
+        val isPublic = messageTags.all { it.virtualFile.parent.name == DIR_AVENUE_CONF }
         val icon = when {
+            isTagsNone -> NONE_ICON
             isInternal -> INTERNAL_SERVICE_ICON
             isExternal -> EXTERNAL_SERVICE_ICON
             isPublic -> PUBLIC_SERVICE_ICON
@@ -67,8 +71,8 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         }
 
         val builder = NavigationGutterIconBuilder.create(icon)
-            .setTargets(messages)
-            .setTooltipText(tip)
+            .setTargets(messageTags)
+            .setTooltipText("Navigate to xml")
 
         result.add(builder.createLineMarkerInfo(leaf))
     }
@@ -78,16 +82,17 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>
     ) {
         if (scalaElement !is PsiCommentImpl) return
-        val groups = commentRegx.matchEntire(scalaElement.text) ?: return
-        val values = groups.groupValues
-        val service = values[1]
-        val message = values[2]
 
-        val (messageTagList, text) = XmlElementFinder.findMessageTags(scalaElement.project, service, message)
-        if (messageTagList.isEmpty()) return
-        val builder = NavigationGutterIconBuilder.create(Const.Icon.File.DESCRIPTION)
-            .setTargets(messageTagList)
-            .setTooltipText(text)
+        val (_, serviceName, messageName) = commentRegx
+            .matchEntire(scalaElement.text)
+            ?.groupValues
+            ?: return
+
+        val messageTags = XmlElementFinder.findMessageTags(scalaElement.module()!!, serviceName, messageName)
+        val icon = if (messageTags.isEmpty()) DESCRIPTION_NONE_ICON else DESCRIPTION_ICON
+        val builder = NavigationGutterIconBuilder.create(icon)
+            .setTargets(messageTags)
+            .setTooltipText("Navigate to xml")
 
         result.add(builder.createLineMarkerInfo(scalaElement))
     }

@@ -6,8 +6,9 @@ object Const {
     object Icon {
         object File {
             val DESCRIPTION = IconLoader.getIcon("/icon/description_file.svg", this.javaClass)
+            val DESCRIPTION_NONE = IconLoader.getIcon("/icon/description_none.svg", this.javaClass)
             val FLOW = IconLoader.getIcon("/icon/flow_file.svg", this.javaClass)
-            val FLOW_ERROR = IconLoader.getIcon("/icon/flow_error.svg", this.javaClass)
+            val FLOW_NONE = IconLoader.getIcon("/icon/flow_none.svg", this.javaClass)
         }
         object Flag {
             object Service {
@@ -15,6 +16,7 @@ object Const {
                 val INTERNAL = IconLoader.getIcon("/icon/flag/service/internal.svg", this.javaClass)
                 val PUBLIC = IconLoader.getIcon("/icon/flag/service/public.svg", this.javaClass)
                 val UNKNOWN = IconLoader.getIcon("/icon/flag/service/uncertain.svg", this.javaClass)
+                val NONE = IconLoader.getIcon("/icon/flag/service/none.svg", this.javaClass)
 
             }
             object Flow {
@@ -28,6 +30,14 @@ object Const {
             const val AVENUE_CONF = "avenue_conf"
             const val EXTERNAL = "external"
             const val INTERNAL = "internal"
+        }
+        object XmlNode {
+            const val MESSAGE = "message"
+            const val SERVICE = "service"
+        }
+        object XmlAttr {
+            const val ID = "id"
+            const val NAME = "name"
         }
     }
 }

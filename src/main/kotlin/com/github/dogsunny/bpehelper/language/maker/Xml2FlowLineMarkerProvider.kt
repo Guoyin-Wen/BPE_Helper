@@ -12,14 +12,16 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.xml.XmlTag
+import com.github.dogsunny.bpehelper.Const.Icon.File.FLOW as FLOW_ICON
+import com.github.dogsunny.bpehelper.Const.Icon.File.FLOW_NONE as FLOW_NONE_ICON
 
 /**
  * 从Xml跳转的Flow
  */
 class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
     companion object {
-        private val definitionRenderer = ListCellRenderer()
-        private val referenceRenderer = XmlLinkedServiceCellRenderer()
+        private val DEFINITION_RENDERER = ListCellRenderer()
+        private val REFERENCE_RENDERER = XmlLinkedServiceCellRenderer()
     }
 
 
@@ -54,7 +56,7 @@ class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         return NavigationGutterIconBuilder.create(icon)
             .setTargets(methodCallList)
             .setTooltipText(text)
-            .setCellRenderer(referenceRenderer)
+            .setCellRenderer(REFERENCE_RENDERER)
     }
 
     private fun definitionMarkerBuilder(
@@ -65,27 +67,29 @@ class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         val flows = FlowElementFinder.findFlowFile(element.project, serviceIdName, messageIdName).sortedBy {
             it.name.split("_")[1].toIntOrNull()
         }
-        val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_ERROR else Const.Icon.File.FLOW
+        val icon = if (flows.isEmpty()) FLOW_NONE_ICON else FLOW_ICON
         val text = if (flows.isNotEmpty()) "点击跳转" else "没有对应的flow文件"
         return NavigationGutterIconBuilder.create(icon)
             .setTargets(flows)
             .setTooltipText(text)
-            .setCellRenderer(definitionRenderer)
+            .setCellRenderer(DEFINITION_RENDERER)
     }
 
     private fun XmlTag.getMessageTag(): XmlTag?  = if (name == "message") this else null
 
     private fun XmlTag.getServiceTag(): XmlTag? {
         if (name == "service") return this
-        if (name != "message" && parentTag?.name == "service") return parentTag
+        if (name == "message" && parentTag?.name == "service") return parentTag
         return null
     }
 
     private fun XmlTag.tag2IdName(): IdName? {
-        val id = getAttributeValue("id")?:return null
-        val name = getAttributeValue("name")?:return null
+        val id = getAttrValueLowerCase("id")?:return null
+        val name = getAttrValueLowerCase("name")?:return null
         return IdName(id, name)
     }
+
+    private fun XmlTag.getAttrValueLowerCase(qname: String) = getAttributeValue(qname)?.lowercase()
 
 }
 

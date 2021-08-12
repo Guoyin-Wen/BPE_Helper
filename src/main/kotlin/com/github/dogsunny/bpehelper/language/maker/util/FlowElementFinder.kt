@@ -24,12 +24,12 @@ object FlowElementFinder {
         val psiManager = PsiManager.getInstance(project)
         return FileTypeIndex.getFiles(ScalaFileType.INSTANCE, GlobalSearchScope.projectScope(project))
             //.filter { fileNameRegx.matches(it.name.lowercase()) }
-            .filter { it.name.endsWith(".flow") }
+            .filter { it.name.lowercase().endsWith(".flow") }
             .mapNotNull { psiManager.findFile(it) }
             .filterIsInstance<ScalaFile>()
             .filter { scalaFile ->
                 scalaFile.getChildrenOfType<PsiComment>()
-                    ?.map { it.text.trim().lowercase() }
+                    ?.map { it.lowerCaseText.trim() }
                     ?.any { commentRegx.matches(it) }?: false
 /*                PsiTreeUtil.findChildrenOfType(it, PsiComment::class.java)
                 .any { comment -> commentRegx.matches(comment.text.trim().lowercase()) }*/
@@ -46,11 +46,11 @@ object FlowElementFinder {
             .filterIsInstance<ScalaFile>()
             .flatMap { it.getChildrenOfTypeAsList<ScMethodCall>() }
             .asSequence()
-            .filter { it.text.startsWith("invoke") }
+            .filter { it.lowerCaseText.startsWith("invoke") }
             .mapNotNull { it.getChildOfType<ScArgumentExprList>() }
             .mapNotNull { it.getChildOfType<ScStringLiteral>() }
-            .filter { it.text.startsWith("\"${serviceInf.name}.") }
-            .filter { messageInf == null || it.text.endsWith(".${messageInf.name}\"") }
+            .filter { it.lowerCaseText.startsWith("\"${serviceInf.name}.") }
+            .filter { messageInf == null || it.lowerCaseText.endsWith(".${messageInf.name}\"") }
             .toList()
     }
 
@@ -58,7 +58,7 @@ object FlowElementFinder {
         val serviceId = serviceInf.id
         val messageId = messageInf?.id ?: "[0-9]+?"
         val messageName = messageInf?.name?:"[a-z]+?"
-        val pattern = "${serviceId}_${messageId}_${messageName}\\.flow".lowercase()
+        val pattern = "${serviceId}_${messageId}_${messageName}\\.flow"
         return Regex(pattern)
     }
 
