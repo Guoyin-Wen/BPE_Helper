@@ -33,15 +33,15 @@ class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         if (!xmlFilePath.contains(Const.Magic.Filename.AVENUE_CONF)) return
         if (targetXmlTag !is XmlTag) return
 
-        val serviceIdName = targetXmlTag.getServiceTag()?.tag2IdName()?:return
-        val messageIdName = targetXmlTag.getMessageTag()?.run { tag2IdName() }
+        val serviceInf = targetXmlTag.getServiceTag()?.tag2IdName()?:return
+        val messageInf = targetXmlTag.getMessageTag()?.run { tag2IdName() }
 
         val markTarget = targetXmlTag.firstChild
         // 这里两个如果再增加用类重构
-        val definitionMarkerBuilder = definitionMarkerBuilder(serviceIdName, messageIdName, targetXmlTag)
+        val definitionMarkerBuilder = definitionMarkerBuilder(serviceInf, messageInf, targetXmlTag)
         result.add(definitionMarkerBuilder.createLineMarkerInfo(markTarget))
 
-        val referenceMakerBuilder = referenceMarkerBuilder(serviceIdName, messageIdName, targetXmlTag)
+        val referenceMakerBuilder = referenceMarkerBuilder(serviceInf, messageInf, targetXmlTag)
         result.add(referenceMakerBuilder.createLineMarkerInfo(markTarget))
     }
 
@@ -65,7 +65,7 @@ class Xml2FlowLineMarkerProvider : RelatedItemLineMarkerProvider() {
         element: XmlTag
     ): NavigationGutterIconBuilder<PsiElement> {
         val flows = FlowElementFinder.findFlowFile(element.project, serviceIdName, messageIdName).sortedBy {
-            it.name.split("_")[1].toIntOrNull()
+            it.name.split("_").getOrNull(1)?.toIntOrNull()
         }
         val icon = if (flows.isEmpty()) FLOW_NONE_ICON else FLOW_ICON
         val text = if (flows.isNotEmpty()) "点击跳转" else "没有对应的flow文件"

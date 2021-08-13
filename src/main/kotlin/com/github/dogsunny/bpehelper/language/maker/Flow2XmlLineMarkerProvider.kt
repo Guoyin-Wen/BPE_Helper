@@ -30,7 +30,7 @@ import com.github.dogsunny.bpehelper.Const.Magic.Filename.AVENUE_CONF as DIR_AVE
  */
 class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
 
-    private val commentRegx = Regex("//\\$([a-zA-Z_]+?)\\.([a-zA-Z_]+?)(\\.with\\([a-zA-Z]+?\\))?")
+    private val commentRegx = Regex("//\\$([a-zA-Z_]+?)\\.([a-zA-Z0-9_]+?)(\\.with\\([a-zA-Z]+?\\))?")
 
     override fun collectNavigationMarkers(
         scalaElement: PsiElement,
