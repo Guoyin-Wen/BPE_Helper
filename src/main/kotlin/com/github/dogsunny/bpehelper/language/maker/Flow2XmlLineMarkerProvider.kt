@@ -11,6 +11,7 @@ import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import com.intellij.psi.xml.XmlTag
+import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
 import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScArgumentExprList
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
@@ -62,28 +63,32 @@ class Flow2XmlLineMarkerProvider : RelatedItemLineMarkerProvider() {
             ?:return
 
         val messageTags = XmlElementFinder.findMessageTags(scalaElement.module()!!, serviceName, messageName)
-        invokeToXml( messageTags, result, leaf)
+        invokeToXml(messageTags, result, leaf)
 
+        var flows = emptyList<ScalaFile>()
         // 因为名称和name相同，所以直接用
-        val messageId = messageTags[0].attrValue(Const.Magic.XmlAttr.ID)
-        val serviceId = messageTags[0].parentTag?.attrValue(Const.Magic.XmlAttr.ID)
-        if (messageId != null && serviceId != null) {
-            val flows = FlowElementFinder.findFlowFile(
-                scalaElement.project,
-                IdName(serviceId, serviceName),
-                IdName(messageId, messageName)
-            ).sortedBy {
-                it.name.split("_")[1].toIntOrNull()
+        if (messageTags.isNotEmpty()) {
+            val messageId = messageTags[0].attrValue(Const.Magic.XmlAttr.ID)
+            val serviceId = messageTags[0].parentTag?.attrValue(Const.Magic.XmlAttr.ID)
+            if (messageId != null && serviceId != null) {
+                flows = FlowElementFinder.findFlowFile(
+                    scalaElement.project,
+                    IdName(serviceId, serviceName),
+                    IdName(messageId, messageName)
+                ).sortedBy {
+                    it.name.split("_")[1].toIntOrNull()
+                }
             }
-            val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_NONE else Const.Icon.File.FLOW
-            val text = if (flows.isNotEmpty()) "点击跳转" else "没有对应的flow文件"
-            NavigationGutterIconBuilder.create(icon)
-                .setTargets(flows)
-                .setTooltipText(text)
-                .setCellRenderer(Xml2FlowLineMarkerProvider.DEFINITION_RENDERER)
-                .createLineMarkerInfo(leaf)
-                .let { result.add(it) }
         }
+
+        val icon = if (flows.isEmpty()) Const.Icon.File.FLOW_NONE else Const.Icon.File.FLOW
+        val text = if (flows.isNotEmpty()) "点击跳转" else "没有对应的flow文件"
+        NavigationGutterIconBuilder.create(icon)
+            .setTargets(flows)
+            .setTooltipText(text)
+            .setCellRenderer(Xml2FlowLineMarkerProvider.DEFINITION_RENDERER)
+            .createLineMarkerInfo(leaf)
+            .let { result.add(it) }
     }
 
     private fun invokeToXml(
